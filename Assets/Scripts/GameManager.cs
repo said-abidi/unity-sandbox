@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,12 +11,7 @@ public class GameManager : MonoBehaviour
 
     public GameState state;
 
-    Case highlightedCase;
-
-    //private Vector2 casePosSelected;
     public Resource resourceSelected;
-
-    //TODO implement event
 
     public void TriggerCaseClick(Case inputCase)
     {
@@ -25,15 +21,11 @@ public class GameManager : MonoBehaviour
             if (inputCase.occupiedResource == null)
             {
                 GridManager.Instance.TransferResourceFromCase(resourceSelected.occupiedCase.coordinate, inputCase.coordinate);
-                highlightedCase.StopHighlight();
-                highlightedCase = null;
             }
             else
             {
                 GridManager.Instance.ResetResourcePosition(resourceSelected);
             }
-            resourceSelected.Unselect();
-            resourceSelected = null;
             UpdateGameState(GameState.Neutral);
         }
     }
@@ -43,17 +35,12 @@ public class GameManager : MonoBehaviour
         Debug.Log($"resource = {resource.occupiedCase.coordinate.x}, {resource.occupiedCase.coordinate.y}");
         if (state == GameState.Neutral)
         {
-            resourceSelected = resource;
-            resourceSelected.Select();
+            resource.Select();
             UpdateGameState(GameState.ResourceMove);
         }
         else if (state == GameState.ResourceMove)
         {
-            resourceSelected.Unselect();
-            resourceSelected = null;
             UpdateGameState(GameState.Neutral);
-            highlightedCase.StopHighlight();
-            highlightedCase = null;
         }
     }
 
@@ -61,46 +48,34 @@ public class GameManager : MonoBehaviour
     {
         state = newState;
 
-        //switch (newState)
-        //{
-        //    case GameState.Neutral:
-        //        break;
-        //    case GameState.ResourceMove:
-        //        break;
-        //    default:
-        //        break;
-        //}
+        switch (newState)
+        {
+            case GameState.Neutral:
+                HandleNeutralState();
+                break;
+            case GameState.ResourceMove:
+                HandleResourceMoveState();
+                break;
+            default:
+                throw new Exception($"Incorrect state mentionned: {newState}");
+        }
     }
 
-
-    private void Update()
+    void HandleNeutralState()
     {
-        if(state == GameState.ResourceMove)
+        if (resourceSelected != null)
         {
-            var outCase = GridManager.Instance.GetCaseAtMousePos();
-            if (highlightedCase == null)
-            {
-                if(outCase.occupiedResource == null)
-                {
-                    highlightedCase = outCase;
-                    outCase.Highlight();
-                }
-            } else if(highlightedCase != outCase)
-            {
-                highlightedCase.StopHighlight();
-                if (outCase.occupiedResource == null)
-                {
-                    highlightedCase = outCase;
-                    outCase.Highlight();
-                } else
-                {
-                    highlightedCase = null;
-                }
-            } else
-            {
-                return;
-            }
+            resourceSelected.Unselect();
         }
+        if (GridManager.Instance.highlightedCase != null)
+        {
+            GridManager.Instance.highlightedCase.StopHighlight();
+        }
+    }
+
+    void HandleResourceMoveState()
+    {
+        return;
     }
 
     void Awake()

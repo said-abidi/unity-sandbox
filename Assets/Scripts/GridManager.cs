@@ -12,6 +12,7 @@ public class GridManager : MonoBehaviour
 
     [SerializeField] private Transform _cam;
 
+    public Case highlightedCase;
 
     private Dictionary<Vector2, Case> _cases;
 
@@ -36,6 +37,7 @@ public class GridManager : MonoBehaviour
                 spawnedCase.name = $"Case {x} {y}";
 
                 var isOffset = ((x % 2 == 0 && y % 2 != 0) || (x % 2 != 0 && y % 2 == 0));
+
                 if ((x == 2 && y == 2) || (x == 6 && y == 6) || (x == 3 && y == 4) || (x == 1 && y == 1))
                 {
                     spawnedCase.Init(new Vector2 (x, y), isOffset, Resource.Type.Wood);
@@ -74,18 +76,17 @@ public class GridManager : MonoBehaviour
         {
             if (fromCase.occupiedResource != null && toCase.occupiedResource == null)
             {
-                toCase.occupiedResource = fromCase.occupiedResource;
-                fromCase.occupiedResource = null;
-                toCase.regenerateResource();
+                toCase.AddResource(fromCase.occupiedResource);
+                fromCase.RemoveResource();
                 return true;
             } else
             {
-                Debug.Log("second case");
+                Debug.Log("Can't transfer resource because there is a resource that is blocking");
                 return false;
             }
         } else
         {
-            Debug.Log("first case");
+            Debug.Log("Can't transfer resource because the fromCase or the toCase is null");
             return false;
         }
     }
@@ -120,5 +121,29 @@ public class GridManager : MonoBehaviour
         var mousePos = GameManager.Instance.cam.ScreenToWorldPoint(Input.mousePosition);
         mousePos.z = 0;
         return mousePos;
+    }
+
+    private void Update()
+    {
+        if (GameManager.Instance.state == GameManager.GameState.ResourceMove)
+        {
+            var outCase = GetCaseAtMousePos();
+
+            if(highlightedCase == outCase)
+            {
+                return;
+            }
+            else
+            {
+                if (highlightedCase != null)
+                {
+                    highlightedCase.StopHighlight();
+                }
+                if (outCase.occupiedResource == null)
+                {
+                    outCase.Highlight();
+                }
+            }
+        }
     }
 }

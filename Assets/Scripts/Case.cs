@@ -48,11 +48,24 @@ public class Case : MonoBehaviour
     {
         _highlight.SetActive(true);
         highlighted = true;
+        GridManager.Instance.highlightedCase = this;
     }
 
     public void StopHighlight()
     {
         _highlight.SetActive(false);
         highlighted = false;
+        GridManager.Instance.highlightedCase = null;
+    }
+
+    public void AddResource(Resource resource)
+    {
+        occupiedResource = resource;
+        regenerateResource();
+    }
+
+    public void RemoveResource()
+    {
+        occupiedResource = null;
     }
 }

@@ -86,11 +86,13 @@ public class Resource : MonoBehaviour
 
     public void Select()
     {
+        GameManager.Instance.resourceSelected = this;
         _spritRenderer.color = new Color(1, 1, 1, 0.5f);
     }
 
     public void Unselect()
     {
+        GameManager.Instance.resourceSelected = null;
         _spritRenderer.color = new Color(1, 1, 1, 1);
     }
 
